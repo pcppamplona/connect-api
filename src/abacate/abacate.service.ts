@@ -56,10 +56,13 @@ export class AbacateService {
     return data;
   }
 
-  async checkPix() {
+  async checkPix(id: string) {
     const { data } = await axios.get(
       `${this.base}/pixQrCode/check`,
-      { headers: this.headers }
+      {
+        headers: this.headers,
+        params: { id }
+      }
     );
     return data;
   }

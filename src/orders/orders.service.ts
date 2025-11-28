@@ -1,0 +1,102 @@
+import { Injectable } from "@nestjs/common";
+import { EvolutionService } from "../evolution/evolution.service";
+import { AbacateService } from "src/abacate/abacate.service";
+import { CreateOrderDto } from "./dto/create-order.dto";
+
+
+@Injectable()
+export class OrdersService {
+
+  private orders: any[] = [];
+
+  constructor(
+    private abacate: AbacateService,
+    private evo: EvolutionService
+  ) {}
+
+  async createOrder(body: CreateOrderDto) {
+
+    const amount = Math.round(
+      Number(body.valor.replace(",", "."))
+      * 100
+    );
+
+    // 1) Criar o customer
+    const customer = await this.abacate.createCustomer({
+      name: body.nome,
+      cellphone: body.telefone,
+      email: body.email,
+      taxId: body.cpf
+    });
+
+    // 2) Criar o PIX dinâmico
+    const pix = await this.abacate.createPix({
+      amount,
+      description: `Pedido de ${body.produto}`,
+      customer: {
+        name: body.nome,
+        cellphone: body.telefone,
+        email: body.email,
+        taxId: body.cpf
+      },
+      metadata: {
+        externalId: Date.now().toString()
+      }
+    });
+
+    // 3) Criar ordem na memória
+    const order = {
+      id: pix.data.id,
+      status: pix.data.status,
+      brCode: pix.data.brCode,
+      brCodeBase64: pix.data.brCodeBase64,
+      amount,
+      ...body
+    };
+
+    this.orders.push(order);
+
+    // 4) Enviar WhatsApp
+    const msg = `
+Olá ${body.nome}, aqui é da LOJA X, recebemos o seu pedido e está quase tudo pronto para o envio!
+Precisamos apenas da confirmação do pagamento.
+
+Detalhes do pedido:
+• ${body.produto}
+• R$ ${(amount / 100).toFixed(2)}
+• ${body.endereco}
+
+Pague agora mesmo com o PIX copia e cola abaixo e garanta o seu pedido antes que acabem as últimas unidades:
+
+${pix.data.brCode}
+    `;
+
+    await this.evo.sendText(body.telefone, msg);
+
+    return order;
+  }
+
+  async checkOrder(id: string) {
+    const status = await this.abacate.checkPix(id);
+
+    const order = this.orders.find(o => o.id === id);
+    if (!order) return { error: "Order not found" };
+
+    order.status = status.data.status;
+
+    return order;
+  }
+
+  async simulate(id: string) {
+    await this.abacate.simulatePayment();
+
+    const order = this.orders.find(o => o.id === id);
+    if (!order) return { error: "Order not found" };
+
+    order.status = "PAID";
+
+    await this.evo.sendText(order.telefone, "Obrigado por comprar conosco!");
+
+    return order;
+  }
+}

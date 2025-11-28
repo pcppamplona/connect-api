@@ -2,8 +2,8 @@ export class CreateBillingDto {
   externalId: string;
   productName: string;
   productDescription?: string;
-  quantity: number = 1;
-  price: number; // em centavos
+  quantity: number;
+  price: number; 
   customer: {
     name: string;
     cellphone: string;

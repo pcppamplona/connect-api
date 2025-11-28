@@ -1,44 +1,44 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
-import { AbacateService } from "./abacate.service";
-import { CreateCustomerDto } from "./dto/create-customer.dto";
-import { CreateBillingDto } from "./dto/create-billing.dto";
-import { CreatePixDto } from "./dto/create-pix.dto";
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { AbacateService } from './abacate.service';
+import { CreateCustomerDto } from './dto/create-customer.dto';
+import { CreateBillingDto } from './dto/create-billing.dto';
+import { CreatePixDto } from './dto/create-pix.dto';
 
-@Controller("abacate")
+@Controller('abacate')
 export class AbacateController {
   constructor(private service: AbacateService) {}
 
-  @Get("customers")
+  @Get('customers')
   listCustomers() {
     return this.service.listCustomers();
   }
 
-  @Post("customers")
+  @Post('customers')
   createCustomer(@Body() body: CreateCustomerDto) {
     return this.service.createCustomer(body);
   }
 
-  @Get("billings")
+  @Get('billings')
   listBillings() {
     return this.service.listBillings();
   }
 
-  @Post("billings")
+  @Post('billings')
   createBilling(@Body() body: CreateBillingDto) {
     return this.service.createBilling(body);
   }
 
-  @Post("pix")
+  @Post('pix')
   createPix(@Body() body: CreatePixDto) {
     return this.service.createPix(body);
   }
 
-  @Get("pix/check")
-  checkPix() {
-    return this.service.checkPix();
+  @Get('pix/check')
+  checkPix(@Query('id') id: string) {
+    return this.service.checkPix(id);
   }
 
-  @Post("pix/simulate")
+  @Post('pix/simulate')
   simulatePix() {
     return this.service.simulatePayment();
   }
