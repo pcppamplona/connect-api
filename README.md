@@ -29,12 +29,15 @@ Este projeto é um backend em NestJS que gerencia pedidos, gera PIX via AbacateP
 
 O backend é desenvolvido com TypeScript e organizado em Controller, Service, Module e DTOs.
 
+
 ## Project setup
 
 ```bash
 $ npm install
 ```
 
+## Env
+copy env.example in .env
 ## Compile and run the project
 
 ```bash
