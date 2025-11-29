@@ -21,7 +21,6 @@ export class OrdersService {
       * 100
     );
 
-    // 1) Criar o customer
     const customer = await this.abacate.createCustomer({
       name: body.nome,
       cellphone: body.telefone,
@@ -29,7 +28,6 @@ export class OrdersService {
       taxId: body.cpf
     });
 
-    // 2) Criar o PIX dinâmico
     const pix = await this.abacate.createPix({
       amount,
       description: `Pedido de ${body.produto}`,
@@ -44,7 +42,6 @@ export class OrdersService {
       }
     });
 
-    // 3) Criar ordem na memória
     const order = {
       id: pix.data.id,
       status: pix.data.status,
@@ -56,7 +53,6 @@ export class OrdersService {
 
     this.orders.push(order);
 
-    // 4) Enviar WhatsApp
     const msg = `
 Olá ${body.nome}, aqui é da LOJA X, recebemos o seu pedido e está quase tudo pronto para o envio!
 Precisamos apenas da confirmação do pagamento.
