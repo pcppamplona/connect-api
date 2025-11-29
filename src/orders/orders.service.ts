@@ -1,31 +1,25 @@
-import { Injectable } from "@nestjs/common";
-import { EvolutionService } from "../evolution/evolution.service";
-import { AbacateService } from "src/abacate/abacate.service";
-import { CreateOrderDto } from "./dto/create-order.dto";
-
+import { Injectable } from '@nestjs/common';
+import { EvolutionService } from '../evolution/evolution.service';
+import { AbacateService } from 'src/abacate/abacate.service';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
 export class OrdersService {
-
   private orders: any[] = [];
 
   constructor(
     private abacate: AbacateService,
-    private evo: EvolutionService
+    private evo: EvolutionService,
   ) {}
 
   async createOrder(body: CreateOrderDto) {
-
-    const amount = Math.round(
-      Number(body.valor.replace(",", "."))
-      * 100
-    );
+    const amount = Math.round(Number(body.valor.replace(',', '.')) * 100);
 
     const customer = await this.abacate.createCustomer({
       name: body.nome,
       cellphone: body.telefone,
       email: body.email,
-      taxId: body.cpf
+      taxId: body.cpf,
     });
 
     const pix = await this.abacate.createPix({
@@ -35,11 +29,11 @@ export class OrdersService {
         name: body.nome,
         cellphone: body.telefone,
         email: body.email,
-        taxId: body.cpf
+        taxId: body.cpf,
       },
       metadata: {
-        externalId: Date.now().toString()
-      }
+        externalId: Date.now().toString(),
+      },
     });
 
     const order = {
@@ -48,7 +42,7 @@ export class OrdersService {
       brCode: pix.data.brCode,
       brCodeBase64: pix.data.brCodeBase64,
       amount,
-      ...body
+      ...body,
     };
 
     this.orders.push(order);
@@ -75,8 +69,8 @@ ${pix.data.brCode}
   async checkOrder(id: string) {
     const status = await this.abacate.checkPix(id);
 
-    const order = this.orders.find(o => o.id === id);
-    if (!order) return { error: "Order not found" };
+    const order = this.orders.find((o) => o.id === id);
+    if (!order) return { error: 'Order not found' };
 
     order.status = status.data.status;
 
@@ -84,15 +78,26 @@ ${pix.data.brCode}
   }
 
   async simulate(id: string) {
-    await this.abacate.simulatePayment();
+    const order = this.orders.find((o) => o.id === id);
+    if (!order) return { error: 'Order not found' };
 
-    const order = this.orders.find(o => o.id === id);
-    if (!order) return { error: "Order not found" };
+    try {
+      // Passa o id para a simulação
+      await this.abacate.simulatePayment(order.id);
 
-    order.status = "PAID";
+      // Opcional: verificar status real da API
+      // const statusData = await this.abacate.checkPix(order.id);
+      // order.status = statusData.data.status;
 
-    await this.evo.sendText(order.telefone, "Obrigado por comprar conosco!");
+      // Para simplificar, já podemos marcar como pago
+      order.status = 'PAID';
 
-    return order;
+      await this.evo.sendText(order.telefone, 'Obrigado por comprar conosco!');
+
+      return order;
+    } catch (err) {
+      console.error('Erro ao simular pagamento:', err);
+      throw new Error('Falha ao processar pagamento');
+    }
   }
 }

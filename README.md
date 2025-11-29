@@ -23,7 +23,11 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Backend - Sistema de Pedidos com PIX
+
+Este projeto é um backend em NestJS que gerencia pedidos, gera PIX via AbacatePay, envia mensagens via WhatsApp usando Evolution, e permite simulação de pagamento.
+
+O backend é desenvolvido com TypeScript e organizado em Controller, Service, Module e DTOs.
 
 ## Project setup
 

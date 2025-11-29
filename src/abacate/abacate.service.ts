@@ -67,10 +67,10 @@ export class AbacateService {
     return data;
   }
 
-  async simulatePayment() {
+  async simulatePayment(id: string) {
     const { data } = await axios.post(
       `${this.base}/pixQrCode/simulate-payment`,
-      { metadata: {} },
+      { id, metadata: {} },
       { headers: this.headers }
     );
     return data;

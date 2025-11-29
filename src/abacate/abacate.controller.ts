@@ -37,9 +37,13 @@ export class AbacateController {
   checkPix(@Query('id') id: string) {
     return this.service.checkPix(id);
   }
+  
+ @Post('pix/simulate')
+  async simulatePix(@Body('id') id: string) {
+    if (!id) {
+      return { error: 'ID da ordem é obrigatório' };
+    }
 
-  @Post('pix/simulate')
-  simulatePix() {
-    return this.service.simulatePayment();
+    return this.service.simulatePayment(id);
   }
 }
